@@ -1,0 +1,30 @@
+services:
+  back-ventas:
+    image: juanjoelproxdlol/back-ventas:latest
+    container_name: back-ventas-app
+    ports:
+      - "8081:8080"
+    environment:
+      DB_ENDPOINT: mysql-ventas
+      DB_PORT: 3306
+      DB_NAME: ventasdb
+      DB_USERNAME: ventasuser
+      DB_PASSWORD: ventaspass
+    depends_on:
+      - mysql-ventas
+    restart: always
+
+  mysql-ventas:
+    image: mysql:8
+    container_name: mysql-ventas
+    environment:
+      MYSQL_DATABASE: ventasdb
+      MYSQL_USER: ventasuser
+      MYSQL_PASSWORD: ventaspass
+      MYSQL_ROOT_PASSWORD: rootpass
+    volumes:
+      - ventas_data:/var/lib/mysql
+    restart: always
+
+volumes:
+  ventas_data:
