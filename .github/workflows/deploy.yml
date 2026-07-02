@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descargar codigo
+      - name: Descargar código
         uses: actions/checkout@v4
 
       - name: Login Docker Hub
@@ -20,7 +20,24 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Build Back Ventas Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/back-ventas:latest .
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/back-ventas:latest .
 
       - name: Push Back Ventas Image
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/back-ventas:latest
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/back-ventas:latest
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ secrets.CLUSTER_NAME }}
+
+      - name: Restart backend deployment
+        run: |
+          kubectl rollout restart deployment back-ventas
